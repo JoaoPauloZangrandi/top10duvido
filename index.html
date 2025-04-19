@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top10Duvido - Listas para Eu Duvido</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #e6f0fa;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 700px;
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #007bff;
+      text-align: center;
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+    p {
+      text-align: center;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .filter-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .filter-btn {
+      background-color: #007bff;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    .filter-btn:hover {
+      background-color: #0056b3;
+    }
+    .filter-btn.active {
+      background-color: #28a745;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    .list-item {
+      background-color: #f8f9fa;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .list-item:hover {
+      transform: translateY(-2px);
+      background-color: #e9ecef;
+    }
+    .list-detail {
+      display: none;
+    }
+    .list-detail.active {
+      display: block;
+    }
+    ol {
+      padding-left: 25px;
+      color: #333;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 15px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Top10Duvido</h1>
+    <p>Listas confiáveis para o jogo Eu Duvido!</p>
+    <div class="filter-buttons">
+      <button class="filter-btn active" data-category="all">Todas</button>
+      <button class="filter-btn" data-category="comida">Comida</button>
+      <button class="filter-btn" data-category="entretenimento">Entretenimento</button>
+      <button class="filter-btn" data-category="cultura">Cultura</button>
+      <button class="filter-btn" data-category="esportes">Esportes</button>
+      <button class="filter-btn" data-category="tecnologia">Tecnologia</button>
+      <button class="filter-btn" data-category="moda">Moda</button>
+    </div>
+    <input type="text" id="search" placeholder="Busque um tema (ex.: comidas, filmes)">
+    <div id="list-container"></div>
+    <div id="detail-container" class="list-detail">
+      <h2 id="detail-title"></h2>
+      <ol id="detail-items"></ol>
+      <p id="detail-source"></p>
+      <button onclick="showLists()">Voltar</button>
+    </div>
+  </div>
+  <script>
+    const searchInput = document.getElementById('search');
+    const listContainer = document.getElementById('list-container');
+    const detailContainer = document.getElementById('detail-container');
+    const detailTitle = document.getElementById('detail-title');
+    const detailItems = document.getElementById('detail-items');
+    const detailSource = document.getElementById('detail-source');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    let currentCategory = 'all';
+
+    const lists = [
+      {
+        id: 1,
+        title: "Top 10 Comidas Típicas do Brasil",
+        items: [
+          "Feijoada",
+          "Pão de queijo",
+          "Coxinha",
+          "Acarajé",
+          "Tapioca",
+          "Moqueca",
+          "Brigadeiro",
+          "Churrasco",
+          "Pastel",
+          "Açaí"
+        ],
+        source: "Baseado em pesquisas de cultura gastronômica brasileira",
+        category: "comida"
+      },
+      {
+        id: 2,
+        title: "Top 10 Filmes Brasileiros Mais Assistidos",
+        items: [
+          "Cidade de Deus",
+          "Tropa de Elite",
+          "Estômago",
+          "Que Horas Ela Volta?",
+          "O Pagador de Promessas",
+          "Central do Brasil",
+          "Aquarius",
+          "O Lobo Atrás da Porta",
+          "Cidade dos Homens",
+          "Bacurau"
+        ],
+        source: "Adaptado de dados da Ancine e IMDb",
+        category: "entretenimento"
+      },
+      {
+        id: 3,
+        title: "Top 10 Jogadores de Futebol de 2025",
+        items: [
+          "Neymar",
+          "Vinicius Jr.",
+          "Pelé (histórico)",
+          "Ronaldo Fenômeno (histórico)",
+          "Gabriel Jesus",
+          "Casemiro",
+          "Alisson",
+          "Thiago Silva",
+          "Endrick",
+          "Richarlison"
+        ],
+        source: "Baseado em rankings da FIFA e ESPN",
+        category: "esportes"
+      },
+      {
+        id: 4,
+        title: "Top 10 Pratos do Mundo (CNN)",
+        items: [
+          "Massaman curry (Tailândia)",
+          "Pizza Napolitana (Itália)",
+          "Chocolate (México)",
+          "Sushi (Japão)",
+          "Pato Pequinês (China)",
+          "Hambúrguer (Alemanha)",
+          "Laksa Assam de Penang (Malásia)",
+          "Tom Yum Goong (Tailândia)",
+          "Sorvete (Global)",
+          "Frango Muamba (Gabão)"
+        ],
+        source: "CNN Travel",
+        category: "comida"
+      },
+      {
+        id: 5,
+        title: "Top 10 Alimentos Mais Populares do Mundo",
+        items: [
+          "Pizza",
+          "Hambúrgueres",
+          "Sushi",
+          "Tacos",
+          "Pasta",
+          "Caril",
+          "Frango Frito",
+          "Bolinhos",
+          "Paella",
+          "Ramen"
+        ],
+        source: "Medium (Savory Chefs)",
+        category: "comida"
+      },
+      {
+        id: 6,
+        title: "Top 10 Alimentos Mais Consumidos do Mundo",
+        items: [
+          "Arroz",
+          "Pão",
+          "Pasta",
+          "Frango",
+          "Porco",
+          "Carne Bovina",
+          "Ovos",
+          "Produtos Lácteos",
+          "Peixe",
+          "Milho"
+        ],
+        source: "Mashed",
+        category: "comida"
+      },
+      {
+        id: 7,
+        title: "Top 10 Filmes de 2025 (Time Out)",
+        items: [
+          "Nickel Boys",
+          "Flow",
+          "The Brutalist",
+          "A Real Pain",
+          "Bridget Jones: Mad About the Boy",
+          "Better Man",
+          "I'm Still Here",
+          "Hard Truths",
+          "Black Bag",
+          "The Girl with the Needle"
+        ],
+        source: "Time Out",
+        category: "entretenimento"
+      },
+      {
+        id: 8,
+        title: "Top 10 Músicas de 2025 (Billboard Hot 100)",
+        items: [
+          "Luther - Kendrick Lamar & SZA",
+          "Nokia - Drake",
+          "Die With A Smile - Lady Gaga & Bruno Mars",
+          "All The Way - BigXthaPlug feat. Bailey Zimmerman",
+          "Pink Pony Club - Chappell Roan",
+          "A Bar Song (Tipsy) - Shaboozey",
+          "Ordinary - Alex Warren",
+          "Lose Control - Teddy Swims",
+          "I'm The Problem - Morgan Wallen",
+          "Beautiful Things - Benson Boone"
+        ],
+        source: "Billboard Hot 100",
+        category: "entretenimento"
+      },
+      {
+        id: 9,
+        title: "Top 10 Destinos Turísticos do Mundo (Tripadvisor)",
+        items: [
+          "Dubai (Emirados Árabes Unidos)",
+          "Bali (Indonésia)",
+          "Londres (Reino Unido)",
+          "Paris (França)",
+          "Roma (Itália)",
+          "Nova York (Estados Unidos)",
+          "Cancún (México)",
+          "Barcelona (Espanha)",
+          "Atenas (Grécia)",
+          "Tóquio (Japão)"
+        ],
+        source: "Tripadvisor Travelers' Choice Awards",
+        category: "cultura"
+      },
+      {
+        id: 10,
+        title: "Top 10 Livros de 2025 (Vogue)",
+        items: [
+          "Playworld - Adam Ross",
+          "Mothers and Sons - Adam Haslett",
+          "Vantage Point - Sarah Sligar",
+          "Homeseeking - Karissa Chen",
+          "The Visitor - Maeve Brennan",
+          "The Motherload - Sarah Hoover",
+          "Isola - Allegra Goodman",
+          "The Echoes - Evie Wyld",
+          "Show Don’t Tell - Curtis Sittenfeld",
+          "Gliff - Ali Smith"
+        ],
+        source: "Vogue",
+        category: "cultura"
+      },
+      {
+        id: 11,
+        title: "Top 10 Tendências Tecnológicas de 2025",
+        items: [
+          "Inteligência Artificial (IA)",
+          "5G",
+          "Internet das Coisas (IoT)",
+          "Tecnologia Blockchain",
+          "Realidade Aumentada (AR) e Realidade Virtual (VR)",
+          "Computação Quântica",
+          "Computação de Borda",
+          "Cibersegurança",
+          "Tecnologia Sustentável",
+          "Automação de Processos Robóticos (RPA)"
+        ],
+        source: "Compilado de várias fontes, incluindo Forbes, Simplilearn, GeeksforGeeks, Technology Magazine, Exploding Topics, Deloitte Insights, StartUs Insights e Cambridge Open Academy",
+        category: "tecnologia"
+      },
+      {
+        id: 12,
+        title: "Top 10 Prospectos de Beisebol de 2025 (MLB)",
+        items: [
+          "Travis Bazzana",
+          "Cam Caminiti",
+          "Charlie Condon",
+          "Chase Burns",
+          "Hagen Smith",
+          "J.J. Wetherholt",
+          "Nick Kurtz",
+          "Konnor Griffin",
+          "Seaver King",
+          "Bryce Rainer"
+        ],
+        source: "MLB.com",
+        category: "esportes"
+      },
+      {
+        id: 13,
+        title: "Top 10 Jogos de Videogame de 2024 (IGN)",
+        items: [
+          "Astro Bot",
+          "Final Fantasy VII Rebirth",
+          "Elden Ring: Shadow of the Erdtree",
+          "Silent Hill 2",
+          "Metaphor: ReFantazio",
+          "Black Myth: Wukong",
+          "Like a Dragon: Infinite Wealth",
+          "Dragon's Dogma 2",
+          "Stellar Blade",
+          "The Legend of Zelda: Echoes of Wisdom"
+        ],
+        source: "IGN",
+        category: "entretenimento"
+      },
+      {
+        id: 14,
+        title: "Top 10 Séries de TV de 2024 (Rotten Tomatoes)",
+        items: [
+          "Shogun",
+          "Baby Reindeer",
+          "One Day",
+          "Mr. & Mrs. Smith",
+          "The Gentlemen",
+          "Hacks",
+          "The Bear",
+          "Ripley",
+          "3 Body Problem",
+          "Fargo"
+        ],
+        source: "Rotten Tomatoes",
+        category: "entretenimento"
+      },
+      {
+        id: 15,
+        title: "Top 10 Fontes Mais Populares de 2025 (Typewolf)",
+        items: [
+          "Helvetica Neue",
+          "Futura",
+          "Proxima Nova",
+          "Avenir",
+          "DIN Next Pro",
+          "Circular",
+          "Gotham",
+          "Neue Haas Unica",
+          "Sohne",
+          "GT America"
+        ],
+        source: "Typewolf",
+        category: "cultura"
+      },
+      {
+        id: 16,
+        title: "Top 10 Atrações Turísticas no Brasil (Embratur)",
+        items: [
+          "Cristo Redentor (RJ)",
+          "Cataratas do Iguaçu (PR)",
+          "Praia de Copacabana (RJ)",
+          "Lençóis Maranhenses (MA)",
+          "Pelourinho (BA)",
+          "Floresta Amazônica (AM)",
+          "Pão de Açúcar (RJ)",
+          "Fernando de Noronha (PE)",
+          "Bonito (MS)",
+          "Ouro Preto (MG)"
+        ],
+        source: "Embratur e pesquisas de turismo brasileiro",
+        category: "cultura"
+      },
+      {
+        id: 17,
+        title: "Top 10 Aplicativos Mais Baixados de 2024 (Sensor Tower)",
+        items: [
+          "TikTok",
+          "Instagram",
+          "WhatsApp",
+          "Facebook",
+          "Telegram",
+          "Snapchat",
+          "CapCut",
+          "Zoom",
+          "Messenger",
+          "Google Maps"
+        ],
+        source: "Sensor Tower",
+        category: "tecnologia"
+      },
+      {
+        id: 18,
+        title: "Top 10 Animais de Estimação Mais Populares (Forbes)",
+        items: [
+          "Cachorro",
+          "Gato",
+          "Peixe",
+          "Pássaro",
+          "Hamster",
+          "Coelho",
+          "Tartaruga",
+          "Porquinho-da-índia",
+          "Cobra",
+          "Furão"
+        ],
+        source: "Forbes e estudos sobre pets",
+        category: "moda"
+      },
+      {
+        id: 19,
+        title: "Top 10 Esportes Mais Populares do Mundo (Sports & Fitness)",
+        items: [
+          "Futebol",
+          "Críquete",
+          "Basquete",
+          "Hóquei",
+          "Tênis",
+          "Vôlei",
+          "Tênis de Mesa",
+          "Beisebol",
+          "Rugby",
+          "Golfe"
+        ],
+        source: "Sports & Fitness e rankings globais",
+        category: "esportes"
+      },
+      {
+        id: 20,
+        title: "Top 10 Marcas Mais Valiosas de 2025 (Interbrand)",
+        items: [
+          "Apple",
+          "Microsoft",
+          "Amazon",
+          "Google",
+          "Samsung",
+          "Toyota",
+          "Mercedes-Benz",
+          "Coca-Cola",
+          "Nike",
+          "BMW"
+        ],
+        source: "Interbrand",
+        category: "moda"
+      },
+      {
+        id: 21,
+        title: "Top 10 Sobremesas Mais Populares do Mundo (TasteAtlas)",
+        items: [
+          "Gelato (Itália)",
+          "Crème Brûlée (França)",
+          "Tiramisu (Itália)",
+          "Cheesecake (EUA)",
+          "Baklava (Turquia)",
+          "Churros (Espanha)",
+          "Pavlova (Austrália)",
+          "Pastel de Nata (Portugal)",
+          "Mochi (Japão)",
+          "Alfajores (Argentina)"
+        ],
+        source: "TasteAtlas",
+        category: "comida"
+      },
+      {
+        id: 22,
+        title: "Top 10 Influenciadores Digitais de 2025 (Forbes)",
+        items: [
+          "MrBeast",
+          "Charli D’Amelio",
+          "Khaby Lame",
+          "Addison Rae",
+          "Bella Poarch",
+          "Zach King",
+          "PewDiePie",
+          "Ryan Kaji",
+          "Logan Paul",
+          "Emma Chamberlain"
+        ],
+        source: "Forbes",
+        category: "cultura"
+      },
+      {
+        id: 23,
+        title: "Top 10 Parques de Diversão do Mundo (Tripadvisor)",
+        items: [
+          "Disney’s Magic Kingdom (EUA)",
+          "Disneyland Paris (França)",
+          "Universal Studios Orlando (EUA)",
+          "Tokyo Disneyland (Japão)",
+          "Europa-Park (Alemanha)",
+          "Beto Carrero World (Brasil)",
+          "Universal Studios Japan (Japão)",
+          "Cedar Point (EUA)",
+          "Six Flags Magic Mountain (EUA)",
+          "Alton Towers (Reino Unido)"
+        ],
+        source: "Tripadvisor",
+        category: "cultura"
+      },
+      {
+        id: 24,
+        title: "Top 10 Músicas Sertanejas Brasileiras de 2025 (Sua Música)",
+        items: [
+          "Leão - Marília Mendonça (homenagem)",
+          "Erro Gostoso - Simone Mendes",
+          "Nosso Quadro - Ana Castela",
+          "Oi Balde - Zé Neto & Cristiano",
+          "Haja Colírio - Guilherme & Benuto",
+          "Eu Gosto Assim - Gusttavo Lima",
+          "Trai Sim - Henrique & Juliano",
+          "Não Vitalício - Matheus & Kauan",
+          "Estado Decadente - Jorge & Mateus",
+          "Vida do Agro - Luan Pereira"
+        ],
+        source: "Sua Música e rankings de streaming",
+        category: "entretenimento"
+      },
+      {
+        id: 25,
+        title: "Top 10 Animes Mais Populares de 2025 (MyAnimeList)",
+        items: [
+          "Jujutsu Kaisen",
+          "Demon Slayer: Kimetsu no Yaiba",
+          "Attack on Titan",
+          "One Piece",
+          "My Hero Academia",
+          "Chainsaw Man",
+          "Spy x Family",
+          "Blue Lock",
+          "Haikyuu!!",
+          "Tokyo Revengers"
+        ],
+        source: "MyAnimeList",
+        category: "cultura"
+      },
+      {
+        id: 26,
+        title: "Top 10 Cidades Mais Visitadas do Brasil (Booking.com)",
+        items: [
+          "Rio de Janeiro (RJ)",
+          "São Paulo (SP)",
+          "Salvador (BA)",
+          "Florianópolis (SC)",
+          "Fortaleza (CE)",
+          "Recife (PE)",
+          "Brasília (DF)",
+          "Gramado (RS)",
+          "Manaus (AM)",
+          "Belo Horizonte (MG)"
+        ],
+        source: "Booking.com e dados de turismo",
+        category: "cultura"
+      },
+      {
+        id: 27,
+        title: "Top 10 Filmes de Animação de Todos os Tempos (Rotten Tomatoes)",
+        items: [
+          "Toy Story",
+          "O Rei Leão",
+          "Procurando Nemo",
+          "Up - Altas Aventuras",
+          "Wall-E",
+          "A Viagem de Chihiro",
+          "Os Incríveis",
+          "Como Treinar o Seu Dragão",
+          "Zootopia",
+          "Viva - A Vida é uma Festa"
+        ],
+        source: "Rotten Tomatoes",
+        category: "entretenimento"
+      },
+      {
+        id: 28,
+        title: "Top 10 Carros Mais Vendidos no Brasil em 2024 (Fenabrave)",
+        items: [
+          "Fiat Strada",
+          "Volkswagen Polo",
+          "Chevrolet Onix",
+          "Hyundai Creta",
+          "Fiat Mobi",
+          "Volkswagen T-Cross",
+          "Chevrolet Tracker",
+          "Toyota Corolla Cross",
+          "Honda City",
+          "Renault Kwid"
+        ],
+        source: "Fenabrave",
+        category: "tecnologia"
+      },
+      {
+        id: 29,
+        title: "Top 10 Jogos de Tabuleiro Modernos (BoardGameGeek)",
+        items: [
+          "Catan",
+          "Ticket to Ride",
+          "Carcassonne",
+          "Pandemic",
+          "7 Wonders",
+          "Azul",
+          "Wingspan",
+          "Terraforming Mars",
+          "Gloomhaven",
+          "Scythe"
+        ],
+        source: "BoardGameGeek",
+        category: "entretenimento"
+      },
+      {
+        id: 30,
+        title: "Top 10 Tendências de Moda de 2025 (Vogue)",
+        items: [
+          "Estampas Florais",
+          "Tons Pastéis",
+          "Alfaiataria Oversized",
+          "Jeans de Cintura Baixa",
+          "Acessórios de Correntes",
+          "Botas de Cano Alto",
+          "Tecidos Sustentáveis",
+          "Roupas Assimétricas",
+          "Cores Neon",
+          "Peças Vintage"
+        ],
+        source: "Vogue",
+        category: "moda"
+      },
+      {
+        id: 31,
+        title: "Top 10 Super-Heróis Mais Populares (IGN)",
+        items: [
+          "Homem-Aranha",
+          "Batman",
+          "Super-Homem",
+          "Mulher-Maravilha",
+          "Homem de Ferro",
+          "Capitão América",
+          "Thor",
+          "Pantera Negra",
+          "Deadpool",
+          "Flash"
+        ],
+        source: "IGN",
+        category: "entretenimento"
+      },
+      {
+        id: 32,
+        title: "Top 10 Séries Brasileiras Mais Assistidas (Netflix Brasil)",
+        items: [
+          "Cidade Invisível",
+          "Bom Dia Verônica",
+          "3%",
+          "Dom",
+          "Coisa Mais Linda",
+          "Irmandade",
+          "Justiça",
+          "Sob Pressão",
+          "O Mecanismo",
+          "Sintonia"
+        ],
+        source: "Netflix Brasil e rankings de audiência",
+        category: "entretenimento"
+      },
+      {
+        id: 33,
+        title: "Top 10 Destinos de Praia no Mundo (Condé Nast Traveler)",
+        items: [
+          "Bora Bora (Polinésia Francesa)",
+          "Maldivas",
+          "Praia do Sancho (Brasil)",
+          "Grace Bay (Turks e Caicos)",
+          "Baía do Sancho (Brasil)",
+          "Anse Lazio (Seychelles)",
+          "Whitehaven Beach (Austrália)",
+          "Tulum (México)",
+          "Navagio Beach (Grécia)",
+          "Playa Norte (México)"
+        ],
+        source: "Condé Nast Traveler",
+        category: "cultura"
+      },
+      {
+        id: 34,
+        title: "Top 10 Músicas de Funk Brasileiro de 2025 (Spotify Brasil)",
+        items: [
+          "Tá OK - DENNIS e MC Kevin o Chris",
+          "Zona de Perigo - Leo Santana",
+          "Amor ou o Litrão - Mila e MC Jottapê",
+          "Novidade na Área - MC Livinho",
+          "Vai Novinha - Anitta",
+          "Baile da Serra - MC Zaac",
+          "Poesia Acústica #15 - Pineapple Storm",
+          "Faz um Vuk Vuk - MC Pedrinho",
+          "Bonde das Maravilhas - MC Gui",
+          "Ritmo Mexicano - DJ Joe"
+        ],
+        source: "Spotify Brasil e rankings de streaming",
+        category: "entretenimento"
+      },
+      {
+        id: 35,
+        title: "Top 10 Brinquedos Clássicos de Todos os Tempos (Toy Insider)",
+        items: [
+          "Lego",
+          "Barbie",
+          "Hot Wheels",
+          "Play-Doh",
+          "Bonecos de Ação (G.I. Joe)",
+          "Cubo Mágico",
+          "Ursinho de Pelúcia",
+          "Carrinhos Matchbox",
+          "Boneca de Pano",
+          "Beyblade"
+        ],
+        source: "Toy Insider",
+        category: "entretenimento"
+      }
+    ];
+
+    function updateLists() {
+      const term = searchInput.value.toLowerCase();
+      const filteredLists = lists.filter(list => {
+        const matchesSearch = list.title.toLowerCase().includes(term);
+        const matchesCategory = currentCategory === 'all' || list.category === currentCategory;
+        return matchesSearch && matchesCategory;
+      });
+      listContainer.innerHTML = '';
+      filteredLists.forEach(list => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        div.dataset.id = list.id;
+        div.innerHTML = `<h3>${list.title}</h3><p>Clique para ver a lista (modo mediador)</p>`;
+        div.addEventListener('click', () => showDetail(list));
+        listContainer.appendChild(div);
+      });
+    }
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        currentCategory = button.dataset.category;
+        updateLists();
+      });
+    });
+
+    searchInput.addEventListener('input', updateLists);
+
+    function showDetail(list) {
+      listContainer.style.display = 'none';
+      searchInput.style.display = 'none';
+      document.querySelector('.filter-buttons').style.display = 'none';
+      detailContainer.className = 'list-detail active';
+      detailTitle.textContent = list.title;
+      detailItems.innerHTML = '';
+      list.items.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        detailItems.appendChild(li);
+      });
+      detailSource.textContent = 'Fonte: ' + list.source;
+    }
+
+    function showLists() {
+      listContainer.style.display = 'block';
+      searchInput.style.display = 'block';
+      document.querySelector('.filter-buttons').style.display = 'flex';
+      detailContainer.className = 'list-detail';
+      updateLists();
+    }
+
+    // Inicializa a página com todas as listas visíveis
+    updateLists();
+  </script>
+</body>
+</html>
